@@ -1,6 +1,18 @@
 import './App.css';
 import React from 'react';
 
+const useSemiPersistentState = (key, initialState) => {
+  const [value, setValue] = React.useState(
+    localStorage.getItem(key) || initialState
+  )
+
+  React.useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [key, value]);
+
+  return [value, setValue];
+};
+
 const App = () => {
   const stories = [
     {
@@ -13,7 +25,7 @@ const App = () => {
     },
     {
       title: 'Redux',
-      url: 'https://redux.js.org/',
+      url: 'https://redux.js.org/', 
       author: 'Dan Abramov, Andrew Clark',
       num_comments: 2,
       points: 5,
@@ -21,11 +33,17 @@ const App = () => {
     }
   ];
 
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
-  // A
+  // const [searchTerm, setSearchTerm] = React.useState(
+  //   localStorage.getItem('search') || 'React'
+  // );
+
+  // React.useEffect(() => {
+  //   localStorage.setItem('search', searchTerm);
+  // }, [searchTerm]);
+
   const handleSearch = (event) => {
-    // C
     setSearchTerm(event.target.value);
   }
 
@@ -47,33 +65,34 @@ const App = () => {
   );
 };
 
-const Search = (props) => {
-  console.log("Search Render");
+const Search = ({ search, onSearch }) => (
+  <>
+    <lable htmlFor="search">Search: </lable>
+    <input 
+      id="search" 
+      type="text" 
+      value={search} 
+      onChange={onSearch}
+    />
+  </>
+);
 
-  return (
-    <div>
-      <lable htmlFor="search">Search: </lable>
-      <input id="search" type="text" value={props.search} onChange={props.onSearch}/>
-    </div>
-  );
-};
-
-const List = (props) => (
+const List = ({ list }) => (
   <ul>
-    {props.list.map((item) => (
-      <Item key={item.objectID} item={item} />
+    {list.map(({objectID, ...item}) => (
+      <Item key={objectID} {...item} />
     ))}
   </ul>
 );
 
-const Item = (props) => (
-  <li key={props.item.objectID}>
+const Item = ({ key, title, url, author, num_comments, points }) => (
+  <li key={key}>
     <span>
-      <a href={props.item.url}>{props.item.title}</a>
+      <a href={url}>{title}</a>
     </span>
-    <span>{props.item.author}</span>
-    <span>{props.item.num_comments}</span>
-    <span>{props.item.points}</span>
+    <span>{author}</span>
+    <span>{num_comments}</span>
+    <span>{points}</span>
   </li>
 );
 
